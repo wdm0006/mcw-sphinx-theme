@@ -14,6 +14,7 @@ Features:
 - Matching navigation from mcginniscommawill.com
 """
 
+import json
 from pathlib import Path
 
 __version__ = "0.1.0"
@@ -29,9 +30,34 @@ def get_html_theme_path():
     return str(Path(__file__).parent)
 
 
+def _parse_json_option(value):
+    """Parse a JSON string option, returning empty list if invalid."""
+    if not value:
+        return []
+    if isinstance(value, list):
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            return parsed if isinstance(parsed, list) else []
+        except (json.JSONDecodeError, TypeError):
+            return []
+    return []
+
+
+def _update_context(app, pagename, templatename, context, doctree):
+    """Update template context with parsed JSON options."""
+    theme_options = context.get("theme_nav_links", "")
+    context["theme_nav_links"] = _parse_json_option(theme_options)
+
+    theme_options = context.get("theme_footer_links", "")
+    context["theme_footer_links"] = _parse_json_option(theme_options)
+
+
 def setup(app):
     """Sphinx extension setup function."""
     app.add_html_theme("wabi_sphinx_theme", get_html_theme_path())
+    app.connect("html-page-context", _update_context)
 
     return {
         "version": __version__,

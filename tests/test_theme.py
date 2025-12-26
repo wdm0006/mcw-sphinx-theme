@@ -4,6 +4,7 @@ from pathlib import Path
 
 import wabi_sphinx_theme
 from wabi_sphinx_theme import WabiStyle, get_html_theme_path, setup
+from wabi_sphinx_theme import _parse_json_option, _update_context
 
 
 class TestThemePackage:
@@ -48,7 +49,7 @@ class TestThemeFiles:
 
     def test_layout_template_exists(self, theme_path: Path) -> None:
         """Test that the layout template exists."""
-        layout = theme_path / "templates" / "layout.html"
+        layout = theme_path / "layout.html"
         assert layout.exists(), "layout.html template is required"
 
     def test_init_exists(self, theme_path: Path) -> None:
@@ -165,14 +166,14 @@ class TestLayoutTemplate:
 
     def test_layout_extends_basic(self, theme_path: Path) -> None:
         """Test that layout extends basic theme."""
-        layout = theme_path / "templates" / "layout.html"
+        layout = theme_path / "layout.html"
         content = layout.read_text()
 
         assert 'extends "basic/layout.html"' in content
 
     def test_layout_has_google_fonts(self, theme_path: Path) -> None:
         """Test that layout includes Google Fonts."""
-        layout = theme_path / "templates" / "layout.html"
+        layout = theme_path / "layout.html"
         content = layout.read_text()
 
         assert "fonts.googleapis.com" in content
@@ -180,7 +181,7 @@ class TestLayoutTemplate:
 
     def test_layout_has_header(self, theme_path: Path) -> None:
         """Test that layout includes header block."""
-        layout = theme_path / "templates" / "layout.html"
+        layout = theme_path / "layout.html"
         content = layout.read_text()
 
         assert "block header" in content
@@ -188,7 +189,7 @@ class TestLayoutTemplate:
 
     def test_layout_has_footer(self, theme_path: Path) -> None:
         """Test that layout includes footer block."""
-        layout = theme_path / "templates" / "layout.html"
+        layout = theme_path / "layout.html"
         content = layout.read_text()
 
         assert "block footer" in content
@@ -196,7 +197,7 @@ class TestLayoutTemplate:
 
     def test_layout_has_navigation(self, theme_path: Path) -> None:
         """Test that layout includes navigation links."""
-        layout = theme_path / "templates" / "layout.html"
+        layout = theme_path / "layout.html"
         content = layout.read_text()
 
         assert 'class="nav"' in content
@@ -204,16 +205,15 @@ class TestLayoutTemplate:
 
     def test_layout_supports_configurable_nav(self, theme_path: Path) -> None:
         """Test that layout uses configurable nav_links."""
-        layout = theme_path / "templates" / "layout.html"
+        layout = theme_path / "layout.html"
         content = layout.read_text()
 
-        # Check for JSON parsing of nav_links
+        # Check that template uses theme_nav_links (parsed by Python, not fromjson)
         assert "theme_nav_links" in content
-        assert "fromjson" in content
 
     def test_layout_supports_configurable_footer(self, theme_path: Path) -> None:
         """Test that layout uses configurable footer_links."""
-        layout = theme_path / "templates" / "layout.html"
+        layout = theme_path / "layout.html"
         content = layout.read_text()
 
         assert "theme_footer_links" in content
@@ -231,6 +231,10 @@ class TestSphinxSetup:
             def add_html_theme(self, name: str, path: str) -> None:
                 self.theme_name = name
                 self.theme_path = path
+
+            def connect(self, event: str, callback) -> None:
+                """Mock event connection."""
+                pass
 
         app = MockApp()
         result = setup(app)
@@ -253,8 +257,62 @@ class TestSphinxSetup:
                 self.theme_name = name
                 self.theme_path = path
 
+            def connect(self, event: str, callback) -> None:
+                """Mock event connection."""
+                pass
+
         app = MockApp()
         setup(app)
 
         assert app.theme_name == "wabi_sphinx_theme"
         assert app.theme_path != ""
+
+
+class TestJsonParsing:
+    """Test JSON parsing helper functions."""
+
+    def test_parse_json_option_empty_string(self) -> None:
+        """Test parsing empty string returns empty list."""
+        assert _parse_json_option("") == []
+
+    def test_parse_json_option_none(self) -> None:
+        """Test parsing None returns empty list."""
+        assert _parse_json_option(None) == []
+
+    def test_parse_json_option_valid_json(self) -> None:
+        """Test parsing valid JSON string."""
+        result = _parse_json_option('[{"name": "Test", "url": "/test/"}]')
+        assert result == [{"name": "Test", "url": "/test/"}]
+
+    def test_parse_json_option_list_passthrough(self) -> None:
+        """Test that lists are passed through unchanged."""
+        input_list = [{"name": "Test", "url": "/test/"}]
+        assert _parse_json_option(input_list) == input_list
+
+    def test_parse_json_option_invalid_json(self) -> None:
+        """Test parsing invalid JSON returns empty list."""
+        assert _parse_json_option("not valid json") == []
+
+    def test_parse_json_option_non_list_json(self) -> None:
+        """Test parsing JSON object (not list) returns empty list."""
+        assert _parse_json_option('{"key": "value"}') == []
+
+    def test_update_context_parses_nav_links(self) -> None:
+        """Test that _update_context parses nav_links."""
+        context = {
+            "theme_nav_links": '[{"name": "Test", "url": "/test/"}]',
+            "theme_footer_links": "",
+        }
+        _update_context(None, None, None, context, None)
+        assert context["theme_nav_links"] == [{"name": "Test", "url": "/test/"}]
+        assert context["theme_footer_links"] == []
+
+    def test_update_context_parses_footer_links(self) -> None:
+        """Test that _update_context parses footer_links."""
+        context = {
+            "theme_nav_links": "",
+            "theme_footer_links": '[{"name": "GitHub", "url": "https://github.com"}]',
+        }
+        _update_context(None, None, None, context, None)
+        assert context["theme_nav_links"] == []
+        assert context["theme_footer_links"] == [{"name": "GitHub", "url": "https://github.com"}]
