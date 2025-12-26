@@ -45,7 +45,7 @@ def _parse_json_option(value):
     return []
 
 
-def _update_context(app, pagename, templatename, context, doctree):
+def _update_context(_app, _pagename, _templatename, context, _doctree):
     """Update template context with parsed JSON options."""
     theme_options = context.get("theme_nav_links", "")
     context["theme_nav_links"] = _parse_json_option(theme_options)

@@ -3,8 +3,13 @@
 from pathlib import Path
 
 import wabi_sphinx_theme
-from wabi_sphinx_theme import WabiStyle, get_html_theme_path, setup
-from wabi_sphinx_theme import _parse_json_option, _update_context
+from wabi_sphinx_theme import (
+    WabiStyle,
+    _parse_json_option,
+    _update_context,
+    get_html_theme_path,
+    setup,
+)
 
 
 class TestThemePackage:
