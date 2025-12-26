@@ -60,21 +60,23 @@
 {% block relbar1 %}
 {% if theme_show_breadcrumbs %}
 <nav class="breadcrumbs" aria-label="Breadcrumb">
-  {% if theme_show_home_breadcrumb and theme_site_url %}
-  <a href="{{ theme_site_url }}">Home</a>
-  <span class="breadcrumbs__separator">/</span>
-  {% endif %}
-  <a href="{{ pathto(master_doc) }}">{{ theme_nav_docs_label if theme_nav_docs_label else 'Docs' }}</a>
-  {% if parents %}
-    {% for parent in parents %}
+  <div class="breadcrumbs__inner">
+    {% if theme_show_home_breadcrumb and theme_site_url %}
+    <a href="{{ theme_site_url }}">Home</a>
     <span class="breadcrumbs__separator">/</span>
-    <a href="{{ parent.link|e }}">{{ parent.title }}</a>
-    {% endfor %}
-  {% endif %}
-  {% if title %}
-  <span class="breadcrumbs__separator">/</span>
-  <span>{{ title|striptags|truncate(40) }}</span>
-  {% endif %}
+    {% endif %}
+    <a href="{{ pathto(master_doc) }}">{{ theme_nav_docs_label if theme_nav_docs_label else 'Docs' }}</a>
+    {% if parents %}
+      {% for parent in parents %}
+      <span class="breadcrumbs__separator">/</span>
+      <a href="{{ parent.link|e }}">{{ parent.title }}</a>
+      {% endfor %}
+    {% endif %}
+    {% if title %}
+    <span class="breadcrumbs__separator">/</span>
+    <span>{{ title|striptags|truncate(40) }}</span>
+    {% endif %}
+  </div>
 </nav>
 {% endif %}
 {% endblock %}
