@@ -1,0 +1,126 @@
+{#
+  Wabi Sphinx Theme - Main Layout Template
+
+  This theme is designed to match the Hugo Wabi theme for visual consistency.
+  All navigation is fully configurable via html_theme_options in conf.py.
+#}
+{% extends "basic/layout.html" %}
+
+{# Load Google Fonts #}
+{% block extrahead %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+{{ super() }}
+{% endblock %}
+
+{# Custom header with configurable navigation #}
+{% block header %}
+<header class="header">
+  <div class="header__inner">
+    {# Logo / Site Title - links to site_url if set, otherwise docs root #}
+    <a href="{{ theme_site_url if theme_site_url else pathto(master_doc) }}" class="header__logo">
+      {{ theme_site_title }}
+    </a>
+
+    {# Mobile Nav Toggle #}
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+      </svg>
+    </button>
+
+    {# Navigation - fully configurable via theme options #}
+    <nav class="nav" role="navigation">
+      {# Parse and render nav_links from JSON config #}
+      {% if theme_nav_links and theme_nav_links != '[]' %}
+        {% set nav_items = theme_nav_links | fromjson if theme_nav_links is string else theme_nav_links %}
+        {% for item in nav_items %}
+          {% set is_external = item.external | default(false) or item.url.startswith('http') %}
+          {% set link_url = item.url if is_external else (theme_site_url ~ item.url if theme_site_url else item.url) %}
+          <a href="{{ link_url }}" class="nav__link"
+             {% if is_external %}target="_blank" rel="noopener noreferrer"{% endif %}>
+            {{ item.name }}
+          </a>
+        {% endfor %}
+      {% endif %}
+
+      {# Docs link - active state, points to documentation root #}
+      {% if theme_nav_show_docs_link %}
+      <a href="{{ pathto(master_doc) }}" class="nav__link nav__link--active">
+        {{ theme_nav_docs_label }}
+      </a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+{% endblock %}
+
+{# Breadcrumbs #}
+{% block relbar1 %}
+{% if theme_show_breadcrumbs %}
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  {% if theme_show_home_breadcrumb and theme_site_url %}
+  <a href="{{ theme_site_url }}">Home</a>
+  <span class="breadcrumbs__separator">/</span>
+  {% endif %}
+  <a href="{{ pathto(master_doc) }}">{{ theme_nav_docs_label if theme_nav_docs_label else 'Docs' }}</a>
+  {% if parents %}
+    {% for parent in parents %}
+    <span class="breadcrumbs__separator">/</span>
+    <a href="{{ parent.link|e }}">{{ parent.title }}</a>
+    {% endfor %}
+  {% endif %}
+  {% if title %}
+  <span class="breadcrumbs__separator">/</span>
+  <span>{{ title|striptags|truncate(40) }}</span>
+  {% endif %}
+</nav>
+{% endif %}
+{% endblock %}
+
+{# Remove duplicate relbar #}
+{% block relbar2 %}{% endblock %}
+
+{# Custom footer with configurable links #}
+{% block footer %}
+<footer class="footer">
+  <div class="footer__inner">
+    {# Footer Links - configurable via theme options #}
+    {% if theme_footer_links and theme_footer_links != '[]' %}
+    <div class="footer__links">
+      {% set footer_items = theme_footer_links | fromjson if theme_footer_links is string else theme_footer_links %}
+      {% for item in footer_items %}
+        <a href="{{ item.url }}" class="footer__link" target="_blank" rel="noopener noreferrer">
+          {{ item.name }}
+        </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {# Copyright #}
+    <p class="footer__copy">
+      {% if theme_footer_copyright %}
+        {{ theme_footer_copyright }}
+      {% else %}
+        &copy; {{ copyright }}
+      {% endif %}
+    </p>
+  </div>
+</footer>
+
+{# Mobile nav toggle script #}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.querySelector('.nav-toggle');
+    const nav = document.querySelector('.nav');
+    if (toggle && nav) {
+      toggle.addEventListener('click', function() {
+        nav.classList.toggle('is-open');
+        const isOpen = nav.classList.contains('is-open');
+        toggle.setAttribute('aria-expanded', isOpen);
+      });
+    }
+  });
+</script>
+{% endblock %}
