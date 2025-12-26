@@ -61,8 +61,8 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/wabi_sphinx_theme"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "sphinx-autobuild",
     "myst-parser",
     "pytest>=8.0.0",
@@ -70,6 +70,7 @@ dev-dependencies = [
     "ruff>=0.8.0",
     "pre-commit>=3.0.0",
     "mypy>=1.0.0",
+    "twine>=5.0.0",
 ]
 
 # ===== Ruff Configuration =====
