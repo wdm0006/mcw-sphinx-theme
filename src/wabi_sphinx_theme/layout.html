@@ -32,15 +32,15 @@
 
     {# Navigation - fully configurable via theme options #}
     <nav class="nav" role="navigation">
-      {# Parse and render nav_links from JSON config #}
-      {% if theme_nav_links and theme_nav_links != '[]' %}
-        {% set nav_items = theme_nav_links | fromjson if theme_nav_links is string else theme_nav_links %}
-        {% for item in nav_items %}
-          {% set is_external = item.external | default(false) or item.url.startswith('http') %}
+      {# Render nav_links - expects a list of dicts with name/label and url #}
+      {% if theme_nav_links %}
+        {% for item in theme_nav_links %}
+          {% set item_name = item.name if item.name is defined else item.label %}
+          {% set is_external = (item.external is defined and item.external) or item.url.startswith('http') %}
           {% set link_url = item.url if is_external else (theme_site_url ~ item.url if theme_site_url else item.url) %}
           <a href="{{ link_url }}" class="nav__link"
              {% if is_external %}target="_blank" rel="noopener noreferrer"{% endif %}>
-            {{ item.name }}
+            {{ item_name }}
           </a>
         {% endfor %}
       {% endif %}
@@ -87,12 +87,11 @@
 <footer class="footer">
   <div class="footer__inner">
     {# Footer Links - configurable via theme options #}
-    {% if theme_footer_links and theme_footer_links != '[]' %}
+    {% if theme_footer_links %}
     <div class="footer__links">
-      {% set footer_items = theme_footer_links | fromjson if theme_footer_links is string else theme_footer_links %}
-      {% for item in footer_items %}
+      {% for item in theme_footer_links %}
         <a href="{{ item.url }}" class="footer__link" target="_blank" rel="noopener noreferrer">
-          {{ item.name }}
+          {{ item.name if item.name is defined else item.label }}
         </a>
       {% endfor %}
     </div>
