@@ -6,11 +6,48 @@
 #}
 {% extends "basic/layout.html" %}
 
-{# Load Google Fonts #}
+{# Load Google Fonts and SEO Meta Tags #}
 {% block extrahead %}
+{# Google Fonts #}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+
+{# SEO Meta Tags #}
+{# Meta description #}
+<meta name="description" content="{{ title|striptags|e }} - {{ project }} documentation">
+
+{# Determine base URL for SEO (prefer docs_base_url, fall back to site_url) #}
+{% set seo_base_url = theme_docs_base_url if theme_docs_base_url else theme_site_url %}
+
+{# Open Graph tags for social sharing #}
+<meta property="og:title" content="{{ title|striptags|e }}">
+<meta property="og:description" content="{{ title|striptags|e }} - {{ project }} documentation">
+<meta property="og:type" content="website">
+{% if seo_base_url %}
+<meta property="og:url" content="{{ seo_base_url }}{% if not seo_base_url.endswith('/') %}/{% endif %}{{ pagename }}.html">
+{% endif %}
+{% if theme_og_image %}
+<meta property="og:image" content="{{ theme_og_image }}">
+{% endif %}
+<meta property="og:site_name" content="{{ project }}">
+
+{# Twitter Card tags #}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title|striptags|e }}">
+<meta name="twitter:description" content="{{ title|striptags|e }} - {{ project }} documentation">
+{% if theme_twitter_site %}
+<meta name="twitter:site" content="{{ theme_twitter_site }}">
+{% endif %}
+{% if theme_og_image %}
+<meta name="twitter:image" content="{{ theme_og_image }}">
+{% endif %}
+
+{# Canonical URL #}
+{% if seo_base_url %}
+<link rel="canonical" href="{{ seo_base_url }}{% if not seo_base_url.endswith('/') %}/{% endif %}{{ pagename }}.html">
+{% endif %}
+
 {{ super() }}
 {% endblock %}
 
