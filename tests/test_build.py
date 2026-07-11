@@ -26,8 +26,7 @@ class TestSphinxBuild:
             check=False,
         )
 
-        # Allow specific warnings we expect
-        assert result.returncode == 0 or "html_static_path" in result.stderr, (
+        assert result.returncode == 0, (
             f"Sphinx build failed:\nstdout: {result.stdout}\nstderr: {result.stderr}"
         )
 
@@ -52,7 +51,7 @@ class TestSphinxBuild:
     @pytest.mark.integration
     def test_build_includes_css(self, docs_path: Path, build_path: Path) -> None:
         """Test that the build includes the theme CSS."""
-        subprocess.run(
+        result = subprocess.run(
             [
                 "sphinx-build",
                 "-b",
@@ -61,19 +60,24 @@ class TestSphinxBuild:
                 str(build_path / "html"),
             ],
             capture_output=True,
+            text=True,
             check=False,
         )
 
-        # Check that CSS is linked in the output
+        assert result.returncode == 0, (
+            f"Sphinx build failed:\nstdout: {result.stdout}\nstderr: {result.stderr}"
+        )
         index_html = build_path / "html" / "index.html"
-        if index_html.exists():
-            content = index_html.read_text()
-            assert "wabi.css" in content or "css" in content
+        assert index_html.exists(), "Build should create index.html"
+
+        # Check that CSS is linked in the output
+        content = index_html.read_text()
+        assert "wabi.css" in content or "css" in content
 
     @pytest.mark.integration
     def test_build_includes_header(self, docs_path: Path, build_path: Path) -> None:
         """Test that the build includes the custom header."""
-        subprocess.run(
+        result = subprocess.run(
             [
                 "sphinx-build",
                 "-b",
@@ -82,11 +86,16 @@ class TestSphinxBuild:
                 str(build_path / "html"),
             ],
             capture_output=True,
+            text=True,
             check=False,
         )
 
+        assert result.returncode == 0, (
+            f"Sphinx build failed:\nstdout: {result.stdout}\nstderr: {result.stderr}"
+        )
         index_html = build_path / "html" / "index.html"
-        if index_html.exists():
-            content = index_html.read_text()
-            # Check for header elements
-            assert "header" in content.lower()
+        assert index_html.exists(), "Build should create index.html"
+
+        content = index_html.read_text()
+        # Check for header elements
+        assert "header" in content.lower()
