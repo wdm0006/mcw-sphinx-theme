@@ -15,6 +15,7 @@ Features:
 """
 
 import json
+import posixpath
 from pathlib import Path
 
 __version__ = "0.1.0"
@@ -56,7 +57,14 @@ def _update_context(app, pagename, _templatename, context, _doctree):
     builder = getattr(app, "builder", None)
     if builder is not None:
         # Builder-specific: ".html" for html, "page/" for dirhtml, honours html_file_suffix.
-        context["wabi_page_uri"] = builder.get_target_uri(pagename)
+        page_uri = builder.get_target_uri(pagename)
+        context["wabi_page_uri"] = page_uri
+
+        # Sphinx < 8.0 builds pageurl as html_baseurl + pagename + out_suffix, which is
+        # wrong for any builder whose output URI is not "<pagename>.html" (e.g. dirhtml).
+        # Recompute it the way Sphinx 8 does so canonical/og:url agree on every version.
+        if app.config.html_baseurl:
+            context["pageurl"] = posixpath.join(app.config.html_baseurl, page_uri)
 
 
 def setup(app):
