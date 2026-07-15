@@ -20,12 +20,17 @@
 {# Determine base URL for SEO (prefer docs_base_url, fall back to site_url) #}
 {% set seo_base_url = theme_docs_base_url if theme_docs_base_url else theme_site_url %}
 
+{# Page URL: prefer Sphinx's own pageurl (set when html_baseurl is configured), otherwise
+   build one from seo_base_url and the builder's real output URI for this page. #}
+{% set seo_page_uri = wabi_page_uri|default(pagename ~ '.html', true) %}
+{% set seo_page_url = pageurl if pageurl else (seo_base_url ~ ('' if seo_base_url.endswith('/') else '/') ~ seo_page_uri if seo_base_url else '') %}
+
 {# Open Graph tags for social sharing #}
 <meta property="og:title" content="{{ title|striptags|e }}">
 <meta property="og:description" content="{{ title|striptags|e }} - {{ project }} documentation">
 <meta property="og:type" content="website">
-{% if seo_base_url %}
-<meta property="og:url" content="{{ seo_base_url }}{% if not seo_base_url.endswith('/') %}/{% endif %}{{ pagename }}.html">
+{% if seo_page_url %}
+<meta property="og:url" content="{{ seo_page_url|e }}">
 {% endif %}
 {% if theme_og_image %}
 <meta property="og:image" content="{{ theme_og_image }}">
@@ -43,9 +48,9 @@
 <meta name="twitter:image" content="{{ theme_og_image }}">
 {% endif %}
 
-{# Canonical URL #}
-{% if seo_base_url %}
-<link rel="canonical" href="{{ seo_base_url }}{% if not seo_base_url.endswith('/') %}/{% endif %}{{ pagename }}.html">
+{# Canonical URL - when pageurl is set, basic/layout.html already emits one via super() #}
+{% if not pageurl and seo_page_url %}
+<link rel="canonical" href="{{ seo_page_url|e }}">
 {% endif %}
 
 {{ super() }}
