@@ -142,8 +142,8 @@ pygments_style = "wabi_sphinx_theme.pygments_style.WabiStyle"
 
 ```bash
 # Clone and install
-git clone https://github.com/wdm0006/wabi-sphinx-theme.git
-cd wabi-sphinx-theme
+git clone https://github.com/wdm0006/mcw-sphinx-theme.git
+cd mcw-sphinx-theme
 uv sync --all-extras
 
 # Run tests

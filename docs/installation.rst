@@ -23,12 +23,12 @@ Install from Source
 
 You can also install directly from the GitHub repository::
 
-    pip install git+https://github.com/wdm0006/wabi-sphinx-theme.git
+    pip install git+https://github.com/wdm0006/mcw-sphinx-theme.git
 
 Or clone and install in development mode::
 
-    git clone https://github.com/wdm0006/wabi-sphinx-theme.git
-    cd wabi-sphinx-theme
+    git clone https://github.com/wdm0006/mcw-sphinx-theme.git
+    cd mcw-sphinx-theme
     pip install -e .
 
 Verify Installation
