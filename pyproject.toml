@@ -45,11 +45,11 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/wdm0006/wabi-sphinx-theme"
+Homepage = "https://github.com/wdm0006/mcw-sphinx-theme"
 Documentation = "https://mcginniscommawill.com"
-Repository = "https://github.com/wdm0006/wabi-sphinx-theme"
-Issues = "https://github.com/wdm0006/wabi-sphinx-theme/issues"
-Changelog = "https://github.com/wdm0006/wabi-sphinx-theme/blob/main/CHANGELOG.md"
+Repository = "https://github.com/wdm0006/mcw-sphinx-theme"
+Issues = "https://github.com/wdm0006/mcw-sphinx-theme/issues"
+Changelog = "https://github.com/wdm0006/mcw-sphinx-theme/blob/main/CHANGELOG.md"
 
 [project.entry-points."sphinx.html_themes"]
 wabi_sphinx_theme = "wabi_sphinx_theme"
