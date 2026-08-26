@@ -100,6 +100,43 @@ Configure the breadcrumb navigation:
         "show_home_breadcrumb": True,
     }
 
+SEO Options
+~~~~~~~~~~~
+
+Every page includes a meta description, Open Graph tags (``og:title``,
+``og:description``, ``og:type``, ``og:site_name``, plus ``og:url`` and
+``og:image`` when available), Twitter Card tags (``twitter:card``,
+``twitter:title``, ``twitter:description``, plus ``twitter:site`` and
+``twitter:image`` when configured), and - when a page URL can be resolved - a
+``<link rel="canonical">``.
+
+.. warning::
+
+   Set ``docs_base_url`` to the URL where *your* documentation is published.
+   The canonical and ``og:url`` tags are built from ``docs_base_url``, and when
+   it is unset they fall back to ``site_url`` - whose default is
+   ``https://mcginniscommawill.com``. A project that configures neither will
+   publish canonical URLs pointing at a domain it does not control, which can
+   hurt the documentation site's search ranking.
+
+.. code-block:: python
+
+    html_theme_options = {
+        # Where these docs are published - used for canonical and og:url
+        "docs_base_url": "https://user.github.io/project/",
+
+        # Absolute URL of the social preview image (og:image / twitter:image)
+        "og_image": "https://user.github.io/project/_static/social-card.png",
+
+        # Handle used for twitter:site
+        "twitter_site": "@username",
+    }
+
+If you already set Sphinx's own ``html_baseurl``, the canonical and ``og:url``
+tags come from that instead and ``docs_base_url`` is not needed. If
+``docs_base_url``, ``site_url``, and ``html_baseurl`` are all empty, no
+canonical or ``og:url`` tag is emitted at all.
+
 Complete Example
 ----------------
 
@@ -222,3 +259,13 @@ All Options Reference
    * - ``show_home_breadcrumb``
      - True
      - Include "Home" link in breadcrumbs
+   * - ``docs_base_url``
+     - ""
+     - Base URL of the published docs, used for canonical and ``og:url``
+       (falls back to ``site_url``)
+   * - ``og_image``
+     - ""
+     - Absolute URL of the image used for ``og:image`` and ``twitter:image``
+   * - ``twitter_site``
+     - ""
+     - Handle used for ``twitter:site``, e.g. ``@username``
