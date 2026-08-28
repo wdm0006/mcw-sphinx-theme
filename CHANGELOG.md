@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- Document the SEO theme options (`docs_base_url`, `og_image`, `twitter_site`)
+  in the README and in `docs/configuration.rst`, including a warning that
+  canonical and `og:url` fall back to `site_url` when `docs_base_url` is unset
+
 ## [0.1.0] - 2025-12-25
 
 ### Added
