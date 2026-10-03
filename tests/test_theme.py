@@ -2,9 +2,13 @@
 
 from pathlib import Path
 
+import pytest
+from sphinx.errors import ConfigError
+
 import wabi_sphinx_theme
 from wabi_sphinx_theme import (
     WabiStyle,
+    _coerce_bool_option,
     _parse_json_option,
     _update_context,
     get_html_theme_path,
@@ -321,3 +325,54 @@ class TestJsonParsing:
         _update_context(None, None, None, context, None)
         assert context["theme_nav_links"] == []
         assert context["theme_footer_links"] == [{"name": "GitHub", "url": "https://github.com"}]
+
+
+class TestBooleanOptions:
+    """Boolean theme options accept bools and unambiguous string spellings."""
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            (True, True),
+            (False, False),
+            ("true", True),
+            ("True", True),
+            (" TRUE ", True),
+            ("false", False),
+            ("False", False),
+            ("yes", True),
+            ("no", False),
+            ("1", True),
+            ("0", False),
+            ("", False),
+        ],
+    )
+    def test_coerce_accepted(self, value: object, expected: bool) -> None:
+        assert _coerce_bool_option("show_breadcrumbs", value) is expected
+
+    @pytest.mark.parametrize("value", ["maybe", "off", None, 1, [], "truee"])
+    def test_coerce_rejected_names_option_and_value(self, value: object) -> None:
+        with pytest.raises(ConfigError) as exc:
+            _coerce_bool_option("show_breadcrumbs", value)
+        assert "show_breadcrumbs" in str(exc.value)
+        assert repr(value) in str(exc.value)
+
+    def test_update_context_normalises_all_three(self) -> None:
+        context = {
+            "theme_nav_show_docs_link": "false",
+            "theme_show_breadcrumbs": "True",
+            "theme_show_home_breadcrumb": False,
+        }
+        _update_context(None, None, None, context, None)
+        assert context["theme_nav_show_docs_link"] is False
+        assert context["theme_show_breadcrumbs"] is True
+        assert context["theme_show_home_breadcrumb"] is False
+
+    def test_update_context_does_not_add_absent_options(self) -> None:
+        context: dict = {}
+        _update_context(None, None, None, context, None)
+        assert "theme_show_breadcrumbs" not in context
+
+    def test_update_context_rejects_garbage(self) -> None:
+        with pytest.raises(ConfigError, match="show_home_breadcrumb"):
+            _update_context(None, None, None, {"theme_show_home_breadcrumb": "maybe"}, None)

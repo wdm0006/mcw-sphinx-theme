@@ -3,6 +3,7 @@
 import re
 import subprocess
 from pathlib import Path
+from typing import ClassVar
 
 import pytest
 
@@ -186,3 +187,45 @@ class TestSeoUrls:
         content = (out / "page" / "index.html").read_text()
         assert CANONICAL_RE.findall(content) == ["https://docs.example.org/page/"]
         assert OG_URL_RE.findall(content) == ["https://docs.example.org/page/"]
+
+
+def _build_with_options(tmp_path: Path, options: str) -> subprocess.CompletedProcess:
+    src, out = tmp_path / "src", tmp_path / "out"
+    _write_project(src, extra_conf=f"html_theme_options.update({options})\n")
+    return subprocess.run(
+        ["sphinx-build", "-b", "html", "-W", str(src), str(out)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+class TestBooleanThemeOptions:
+    """String and bool spellings of the boolean options render identically."""
+
+    CASES: ClassVar[list[tuple[str, str]]] = [
+        ("show_breadcrumbs", 'class="breadcrumbs"'),
+        ("nav_show_docs_link", "nav__link--active"),
+        ("show_home_breadcrumb", ">Home</a>"),
+    ]
+
+    @pytest.mark.integration
+    @pytest.mark.parametrize(("option", "marker"), CASES)
+    @pytest.mark.parametrize(
+        ("value", "present"),
+        [('"false"', False), ('"true"', True), ("True", True), ("False", False)],
+    )
+    def test_spellings(
+        self, tmp_path: Path, option: str, marker: str, value: str, present: bool
+    ) -> None:
+        result = _build_with_options(tmp_path, f'{{"{option}": {value}}}')
+        assert result.returncode == 0, result.stderr
+        content = (tmp_path / "out" / "page.html").read_text()
+        assert (marker in content) is present
+
+    @pytest.mark.integration
+    def test_garbage_value_fails_build(self, tmp_path: Path) -> None:
+        result = _build_with_options(tmp_path, '{"show_breadcrumbs": "maybe"}')
+        assert result.returncode != 0
+        assert "show_breadcrumbs" in result.stderr
+        assert "maybe" in result.stderr
