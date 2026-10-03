@@ -225,6 +225,11 @@ The style uses these colors:
 All Options Reference
 ---------------------
 
+``nav_show_docs_link``, ``show_breadcrumbs`` and ``show_home_breadcrumb``
+accept a Python bool or the strings ``"true"``/``"false"`` (case-insensitive;
+``"yes"``/``"no"`` and ``"1"``/``"0"`` also work). Any other value fails the
+build with an error naming the option.
+
 .. list-table::
    :header-rows: 1
    :widths: 25 15 60
@@ -243,7 +248,7 @@ All Options Reference
      - JSON array of navigation links
    * - ``nav_show_docs_link``
      - True
-     - Show "Docs" link in navigation
+     - Show "Docs" link in navigation (bool or ``"true"``/``"false"``)
    * - ``nav_docs_label``
      - "Docs"
      - Label for the docs navigation link
@@ -255,10 +260,10 @@ All Options Reference
      - Custom copyright (uses Sphinx's if empty)
    * - ``show_breadcrumbs``
      - True
-     - Show breadcrumb navigation
+     - Show breadcrumb navigation (bool or ``"true"``/``"false"``)
    * - ``show_home_breadcrumb``
      - True
-     - Include "Home" link in breadcrumbs
+     - Include "Home" link in breadcrumbs (bool or ``"true"``/``"false"``)
    * - ``docs_base_url``
      - ""
      - Base URL of the published docs, used for canonical and ``og:url``

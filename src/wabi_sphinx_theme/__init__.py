@@ -18,6 +18,8 @@ import json
 import posixpath
 from pathlib import Path
 
+from sphinx.errors import ConfigError
+
 __version__ = "0.1.0"
 
 # Export the Pygments style for easy access
@@ -46,6 +48,27 @@ def _parse_json_option(value):
     return []
 
 
+_BOOLEAN_OPTIONS = ("nav_show_docs_link", "show_breadcrumbs", "show_home_breadcrumb")
+_TRUE_STRINGS = {"true", "1", "yes"}
+_FALSE_STRINGS = {"false", "0", "no", ""}
+
+
+def _coerce_bool_option(name, value):
+    """Return a bool for a boolean theme option, or raise ConfigError."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        normalised = value.strip().lower()
+        if normalised in _TRUE_STRINGS:
+            return True
+        if normalised in _FALSE_STRINGS:
+            return False
+    raise ConfigError(
+        f"Invalid value {value!r} for theme option {name!r}: "
+        "expected a bool or one of 'true'/'false' (also 'yes'/'no', '1'/'0')."
+    )
+
+
 def _update_context(app, pagename, _templatename, context, _doctree):
     """Update template context with parsed JSON options and the page's output URI."""
     theme_options = context.get("theme_nav_links", "")
@@ -53,6 +76,11 @@ def _update_context(app, pagename, _templatename, context, _doctree):
 
     theme_options = context.get("theme_footer_links", "")
     context["theme_footer_links"] = _parse_json_option(theme_options)
+
+    for name in _BOOLEAN_OPTIONS:
+        key = f"theme_{name}"
+        if key in context:
+            context[key] = _coerce_bool_option(name, context[key])
 
     builder = getattr(app, "builder", None)
     if builder is not None:

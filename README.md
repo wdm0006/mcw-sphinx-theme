@@ -134,12 +134,12 @@ emitted at all.
 | `site_title` | "McGinnis, Will" | Header title |
 | `site_url` | "https://mcginniscommawill.com" | Base URL for nav links |
 | `nav_links` | (see defaults) | JSON array of `{name, url}` objects |
-| `nav_show_docs_link` | `True` | Show "Docs" link in nav |
+| `nav_show_docs_link` | `True` | Show "Docs" link in nav (bool or `"true"`/`"false"`) |
 | `nav_docs_label` | "Docs" | Label for docs link |
 | `footer_links` | (see defaults) | JSON array of footer links |
 | `footer_copyright` | "" | Custom copyright text |
-| `show_breadcrumbs` | `True` | Show breadcrumb navigation |
-| `show_home_breadcrumb` | `True` | Include "Home" in breadcrumbs |
+| `show_breadcrumbs` | `True` | Show breadcrumb navigation (bool or `"true"`/`"false"`) |
+| `show_home_breadcrumb` | `True` | Include "Home" in breadcrumbs (bool or `"true"`/`"false"`) |
 | `docs_base_url` | "" | Base URL of the published docs, used for canonical and `og:url` (falls back to `site_url`) |
 | `og_image` | "" | Absolute URL of the image used for `og:image` and `twitter:image` |
 | `twitter_site` | "" | Handle used for `twitter:site`, e.g. `@username` |
