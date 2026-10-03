@@ -229,3 +229,84 @@ class TestBooleanThemeOptions:
         assert result.returncode != 0
         assert "show_breadcrumbs" in result.stderr
         assert "maybe" in result.stderr
+
+
+class TestHtmlEscaping:
+    """Interpolated values are escaped in text nodes and attributes (Sphinx does not autoescape)."""
+
+    TITLE = "Tips & Tricks <beta>"
+    ESCAPED_TITLE = "Tips &amp; Tricks &lt;beta&gt;"
+    NASTY = 'Will "Bill" <McG> & Co'
+    ESCAPED_NASTY = "Will &#34;Bill&#34; &lt;McG&gt; &amp; Co"
+
+    def _build_nasty(self, tmp_path: Path) -> Path:
+        src, out = tmp_path / "src", tmp_path / "out"
+        nasty_opts = {
+            "site_title": self.NASTY,
+            "nav_docs_label": self.NASTY,
+            "nav_links": [{"name": self.NASTY, "url": 'https://a.test/?q="x"&y=<z>'}],
+            "footer_links": [{"name": self.NASTY, "url": 'https://b.test/?q="x"&y=<z>'}],
+        }
+        _write_project(
+            src,
+            extra_conf=(
+                f"project = 'The \"Quoted\" Project'\nhtml_theme_options.update({nasty_opts!r})\n"
+            ),
+        )
+        title = self.TITLE
+        (src / "page.rst").write_text(f"{title}\n{'=' * len(title)}\n\n.. toctree::\n\n   child\n")
+        (src / "child.rst").write_text("Child\n=====\n\nBody.\n")
+        _build(src, out, "html")
+        return out
+
+    @pytest.mark.integration
+    def test_breadcrumb_titles_escaped(self, tmp_path: Path) -> None:
+        out = self._build_nasty(tmp_path)
+
+        page = (out / "page.html").read_text()
+        assert f"<span>{self.ESCAPED_TITLE}</span>" in page
+        assert "<beta>" not in page
+
+        child = (out / "child.html").read_text()
+        assert f">{self.ESCAPED_TITLE}</a>" in child
+        assert "<beta>" not in child
+
+    @pytest.mark.integration
+    def test_project_escaped_in_meta_attributes(self, tmp_path: Path) -> None:
+        out = self._build_nasty(tmp_path)
+        content = (out / "page.html").read_text()
+
+        quoted = "The &#34;Quoted&#34; Project"
+        assert re.findall(r'<meta name="description" content="([^"]*)"', content) == [
+            f"{self.ESCAPED_TITLE} - {quoted} documentation"
+        ]
+        assert re.findall(r'<meta property="og:description" content="([^"]*)"', content) == [
+            f"{self.ESCAPED_TITLE} - {quoted} documentation"
+        ]
+        assert re.findall(r'<meta name="twitter:description" content="([^"]*)"', content) == [
+            f"{self.ESCAPED_TITLE} - {quoted} documentation"
+        ]
+        assert re.findall(r'<meta property="og:site_name" content="([^"]*)"', content) == [quoted]
+
+    @pytest.mark.integration
+    def test_theme_option_text_and_hrefs_escaped(self, tmp_path: Path) -> None:
+        out = self._build_nasty(tmp_path)
+        content = (out / "page.html").read_text()
+
+        assert content.count(self.ESCAPED_NASTY) >= 5
+        assert "<McG>" not in content
+        escaped_query = "?q=&#34;x&#34;&amp;y=&lt;z&gt;"
+        assert f'href="https://a.test/{escaped_query}"' in content
+        assert f'href="https://b.test/{escaped_query}"' in content
+
+    @pytest.mark.integration
+    def test_copyright_stays_raw(self, tmp_path: Path) -> None:
+        src, out = tmp_path / "src", tmp_path / "out"
+        _write_project(
+            src,
+            extra_conf=(
+                "html_theme_options.update({'footer_copyright': '<a href=\"/c\">Me</a> &amp; you'})\n"
+            ),
+        )
+        _build(src, out, "html")
+        assert '<a href="/c">Me</a> &amp; you' in (out / "page.html").read_text()
