@@ -15,7 +15,7 @@
 
 {# SEO Meta Tags #}
 {# Meta description #}
-<meta name="description" content="{{ title|striptags|e }} - {{ project }} documentation">
+<meta name="description" content="{{ title|striptags|e }} - {{ project|e }} documentation">
 
 {# Determine base URL for SEO (prefer docs_base_url, fall back to site_url) #}
 {% set seo_base_url = theme_docs_base_url if theme_docs_base_url else theme_site_url %}
@@ -27,7 +27,7 @@
 
 {# Open Graph tags for social sharing #}
 <meta property="og:title" content="{{ title|striptags|e }}">
-<meta property="og:description" content="{{ title|striptags|e }} - {{ project }} documentation">
+<meta property="og:description" content="{{ title|striptags|e }} - {{ project|e }} documentation">
 <meta property="og:type" content="website">
 {% if seo_page_url %}
 <meta property="og:url" content="{{ seo_page_url|e }}">
@@ -35,12 +35,12 @@
 {% if theme_og_image %}
 <meta property="og:image" content="{{ theme_og_image }}">
 {% endif %}
-<meta property="og:site_name" content="{{ project }}">
+<meta property="og:site_name" content="{{ project|e }}">
 
 {# Twitter Card tags #}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ title|striptags|e }}">
-<meta name="twitter:description" content="{{ title|striptags|e }} - {{ project }} documentation">
+<meta name="twitter:description" content="{{ title|striptags|e }} - {{ project|e }} documentation">
 {% if theme_twitter_site %}
 <meta name="twitter:site" content="{{ theme_twitter_site }}">
 {% endif %}
@@ -62,7 +62,7 @@
   <div class="header__inner">
     {# Logo / Site Title - links to site_url if set, otherwise docs root #}
     <a href="{{ theme_site_url if theme_site_url else pathto(master_doc) }}" class="header__logo">
-      {{ theme_site_title }}
+      {{ theme_site_title|e }}
     </a>
 
     {# Mobile Nav Toggle #}
@@ -80,9 +80,9 @@
           {% set item_name = item.name if item.name is defined else item.label %}
           {% set is_external = (item.external is defined and item.external) or item.url.startswith('http') %}
           {% set link_url = item.url if is_external else (theme_site_url ~ item.url if theme_site_url else item.url) %}
-          <a href="{{ link_url }}" class="nav__link"
+          <a href="{{ link_url|e }}" class="nav__link"
              {% if is_external %}target="_blank" rel="noopener noreferrer"{% endif %}>
-            {{ item_name }}
+            {{ item_name|e }}
           </a>
         {% endfor %}
       {% endif %}
@@ -90,7 +90,7 @@
       {# Docs link - active state, points to documentation root #}
       {% if theme_nav_show_docs_link %}
       <a href="{{ pathto(master_doc) }}" class="nav__link nav__link--active">
-        {{ theme_nav_docs_label }}
+        {{ theme_nav_docs_label|e }}
       </a>
       {% endif %}
     </nav>
@@ -107,16 +107,16 @@
     <a href="{{ theme_site_url }}">Home</a>
     <span class="breadcrumbs__separator">/</span>
     {% endif %}
-    <a href="{{ pathto(master_doc) }}">{{ theme_nav_docs_label if theme_nav_docs_label else 'Docs' }}</a>
+    <a href="{{ pathto(master_doc) }}">{{ (theme_nav_docs_label if theme_nav_docs_label else "Docs")|e }}</a>
     {% if parents %}
       {% for parent in parents %}
       <span class="breadcrumbs__separator">/</span>
-      <a href="{{ parent.link|e }}">{{ parent.title }}</a>
+      <a href="{{ parent.link|e }}">{{ parent.title|e }}</a>
       {% endfor %}
     {% endif %}
     {% if title %}
     <span class="breadcrumbs__separator">/</span>
-    <span>{{ title|striptags|truncate(40) }}</span>
+    <span>{{ title|striptags|truncate(40)|e }}</span>
     {% endif %}
   </div>
 </nav>
@@ -134,8 +134,8 @@
     {% if theme_footer_links %}
     <div class="footer__links">
       {% for item in theme_footer_links %}
-        <a href="{{ item.url }}" class="footer__link" target="_blank" rel="noopener noreferrer">
-          {{ item.name if item.name is defined else item.label }}
+        <a href="{{ item.url|e }}" class="footer__link" target="_blank" rel="noopener noreferrer">
+          {{ (item.name if item.name is defined else item.label)|e }}
         </a>
       {% endfor %}
     </div>
