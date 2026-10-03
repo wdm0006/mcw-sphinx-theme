@@ -1,5 +1,6 @@
 """Tests for the Wabi Sphinx Theme core functionality."""
 
+import re
 from pathlib import Path
 
 import pytest
@@ -168,6 +169,18 @@ class TestCSSContent:
         assert ".header" in content
         assert ".nav__link" in content
         assert ".footer" in content
+
+    def test_responsive_block_keeps_sidebar_visible(self, theme_path: Path) -> None:
+        """The narrow-viewport block must not hide the TOC/search sidebar."""
+        content = (theme_path / "static" / "css" / "wabi.css").read_text()
+
+        start = content.index("@media (max-width: 1100px)")
+        end = content.index("\n}\n", start)
+        block = content[start:end]
+
+        match = re.search(r"div\.sphinxsidebar\s*\{([^}]*)\}", block)
+        assert match, "responsive block must style div.sphinxsidebar"
+        assert not re.search(r"display\s*:\s*none", match.group(1))
 
 
 class TestLayoutTemplate:
