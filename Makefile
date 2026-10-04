@@ -51,13 +51,13 @@ pre-commit:
 
 # Testing
 test:
-	uv run pytest -m "not slow and not integration" --cov-fail-under=0
+	uv run pytest -m "not slow and not integration"
 
 test-all:
-	uv run pytest --cov-fail-under=0
+	uv run pytest
 
 coverage:
-	uv run pytest --cov-report=html --cov-fail-under=0
+	uv run pytest --cov-report=html
 	@echo "Coverage report: coverage_html/index.html"
 
 # Documentation
