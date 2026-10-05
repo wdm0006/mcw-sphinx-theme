@@ -189,6 +189,34 @@ class TestSeoUrls:
         assert OG_URL_RE.findall(content) == ["https://docs.example.org/page/"]
 
 
+class TestSidebarToctreeCaptions:
+    """Caption groups demote the sidebar heading; plain toctrees keep it."""
+
+    def _build_index(self, tmp_path: Path, with_caption: bool) -> str:
+        src, out = tmp_path / "src", tmp_path / "out"
+        _write_project(src)
+        caption = "   :caption: Sections\n" if with_caption else ""
+        (src / "index.rst").write_text(f"Index\n=====\n\n.. toctree::\n{caption}\n   page\n")
+        _build(src, out, "html")
+        return (out / "page.html").read_text()
+
+    @pytest.mark.integration
+    def test_caption_groups_demote_sidebar_heading(self, tmp_path: Path) -> None:
+        """With caption groups, the default heading becomes visually hidden."""
+        content = self._build_index(tmp_path, with_caption=True)
+        assert '<p class="caption"' in content
+        assert '<h3 class="sr-only">Table of Contents</h3>' in content
+        assert "Table of Contents</a></h3>" not in content
+
+    @pytest.mark.integration
+    def test_plain_toctree_keeps_sidebar_heading(self, tmp_path: Path) -> None:
+        """Without captions, the basic theme's linked heading is kept."""
+        content = self._build_index(tmp_path, with_caption=False)
+        assert '<p class="caption"' not in content
+        assert "Table of Contents</a></h3>" in content
+        assert '<h3 class="sr-only">' not in content
+
+
 def _build_with_options(tmp_path: Path, options: str) -> subprocess.CompletedProcess:
     src, out = tmp_path / "src", tmp_path / "out"
     _write_project(src, extra_conf=f"html_theme_options.update({options})\n")

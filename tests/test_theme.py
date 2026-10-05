@@ -62,6 +62,11 @@ class TestThemeFiles:
         layout = theme_path / "layout.html"
         assert layout.exists(), "layout.html template is required"
 
+    def test_globaltoc_template_exists(self, theme_path: Path) -> None:
+        """Test that the caption-aware globaltoc sidebar template exists."""
+        template = theme_path / "globaltoc.html"
+        assert template.exists(), "globaltoc.html sidebar template is required"
+
     def test_init_exists(self, theme_path: Path) -> None:
         """Test that __init__.py exists."""
         init_file = theme_path / "__init__.py"
@@ -169,6 +174,15 @@ class TestCSSContent:
         assert ".header" in content
         assert ".nav__link" in content
         assert ".footer" in content
+
+    def test_css_has_sidebar_caption_styles(self, theme_path: Path) -> None:
+        """Test that CSS styles toctree caption groups and nav hierarchy."""
+        css_file = theme_path / "static" / "css" / "wabi.css"
+        content = css_file.read_text()
+
+        assert ".sphinxsidebar p.caption" in content
+        assert ".sphinxsidebar .toctree-l1" in content
+        assert ".sphinxsidebar .toctree-l2" in content
 
     def test_responsive_block_keeps_sidebar_visible(self, theme_path: Path) -> None:
         """The narrow-viewport block must not hide the TOC/search sidebar."""
