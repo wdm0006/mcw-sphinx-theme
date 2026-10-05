@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Sidebar styling for toctree caption groups: `:caption:` sections render as
+  small-caps mono eyebrows with a subtle divider between groups, nested
+  entries step down in size and color, and long labels wrap cleanly. When
+  caption groups are present the default "Table of Contents" sidebar heading
+  is demoted to a visually hidden label via the new `globaltoc.html`
+  template; plain toctrees keep the basic theme's heading
+
 ### Documentation
 
 - Document the SEO theme options (`docs_base_url`, `og_image`, `twitter_site`)

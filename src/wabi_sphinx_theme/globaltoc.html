@@ -1,0 +1,14 @@
+{# Wabi sidebar template: global table of contents.
+
+Shadows basic/globaltoc.html so that when the toctree carries caption
+groups, the default "Table of Contents" heading is demoted to a visually
+hidden label (the captions act as the section headings). Without captions,
+the basic theme's heading - including its link to the root document - is
+kept unchanged. #}
+{% set wabi_global_toc = toctree(includehidden=theme_globaltoc_includehidden, collapse=theme_globaltoc_collapse, maxdepth=theme_globaltoc_maxdepth) %}
+{% if wabi_global_toc and 'class="caption"' in wabi_global_toc %}
+<h3 class="sr-only">{{ _('Table of Contents') }}</h3>
+{% else %}
+<h3><a href="{{ pathto(root_doc)|e }}">{{ _('Table of Contents') }}</a></h3>
+{% endif %}
+{{ wabi_global_toc }}
