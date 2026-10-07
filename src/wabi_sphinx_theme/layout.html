@@ -58,6 +58,7 @@
 
 {# Custom header with configurable navigation #}
 {% block header %}
+<a class="skip-link" href="#main-content">Skip to content</a>
 <header class="header">
   <div class="header__inner">
     {# Logo / Site Title - links to site_url if set, otherwise docs root #}
@@ -121,6 +122,12 @@
   </div>
 </nav>
 {% endif %}
+{% endblock %}
+
+{# Skip-link target, immediately before the sidebar/content grid #}
+{% block content %}
+<div id="main-content" tabindex="-1"></div>
+{{ super() }}
 {% endblock %}
 
 {# Remove duplicate relbar #}

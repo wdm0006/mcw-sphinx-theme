@@ -174,3 +174,25 @@ class TestSeoBaseUrl:
         # The rest of the SEO block is unaffected.
         assert OG_TITLE_RE.findall(content) == ["Page"]
         assert TWITTER_CARD_RE.findall(content) == ["summary_large_image"]
+
+
+class TestSkipLink:
+    """The rendered page offers a keyboard bypass to the main content."""
+
+    @pytest.mark.integration
+    def test_skip_link_is_first_focusable_and_targets_existing_id(self, tmp_path: Path) -> None:
+        """The skip link precedes the header and its href matches an id in the page."""
+        html = _build_page(tmp_path, {})
+        links = re.findall(r'<a class="skip-link" href="#([^"]*)">Skip to content</a>', html)
+        assert links == ["main-content"]
+        assert html.count('id="main-content"') == 1
+        assert html.index('class="skip-link"') < html.index('<header class="header">')
+        assert html.index('id="main-content"') < html.index('class="body"')
+
+    @pytest.mark.integration
+    def test_search_input_keeps_an_accessible_name(self, tmp_path: Path) -> None:
+        """The sidebar search input is labelled by an element that exists on the page."""
+        html = _build_page(tmp_path, {})
+        label = re.search(r'<input type="text" name="q" aria-labelledby="([^"]*)"', html)
+        assert label is not None
+        assert f'id="{label.group(1)}"' in html

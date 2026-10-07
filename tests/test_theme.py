@@ -175,6 +175,20 @@ class TestCSSContent:
         assert ".nav__link" in content
         assert ".footer" in content
 
+    def test_css_has_focus_visible_rules(self, theme_path: Path) -> None:
+        """Links, the nav toggle and the search input get an accent focus ring."""
+        css = (theme_path / "static" / "css" / "wabi.css").read_text()
+        rule = re.search(r"a:focus-visible,(.*?)\{(.*?)\}", css, re.DOTALL)
+        assert rule is not None
+        assert ".nav-toggle:focus-visible" in rule.group(1)
+        assert '.sphinxsidebar input[type="text"]:focus-visible' in rule.group(1)
+        assert "outline: 2px solid var(--color-accent)" in rule.group(2)
+
+    def test_css_hides_skip_link_until_focused(self, theme_path: Path) -> None:
+        css = (theme_path / "static" / "css" / "wabi.css").read_text()
+        assert ".skip-link:focus {" in css
+        assert "translateY(-200%)" in css
+
     def test_css_has_sidebar_caption_styles(self, theme_path: Path) -> None:
         """Test that CSS styles toctree caption groups and nav hierarchy."""
         css_file = theme_path / "static" / "css" / "wabi.css"
