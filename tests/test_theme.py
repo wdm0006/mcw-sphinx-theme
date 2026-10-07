@@ -197,6 +197,39 @@ class TestCSSContent:
         assert not re.search(r"display\s*:\s*none", match.group(1))
 
 
+def _css_token(css: str, name: str) -> str:
+    match = re.search(rf"{re.escape(name)}:\s*(#[0-9a-fA-F]{{6}})\s*;", css)
+    assert match, f"{name} not defined as a 6-digit hex in :root"
+    return match.group(1)
+
+
+def _luminance(hex_color: str) -> float:
+    channels = [int(hex_color[i : i + 2], 16) / 255 for i in (1, 3, 5)]
+    r, g, b = (c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in channels)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def _contrast(fg: str, bg: str) -> float:
+    hi, lo = sorted((_luminance(fg), _luminance(bg)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+class TestColorContrast:
+    """WCAG AA contrast of the secondary text token."""
+
+    @pytest.mark.parametrize("bg_token", ["--color-bg", "--color-bg-subtle"])
+    def test_text_subtle_meets_aa(self, theme_path: Path, bg_token: str) -> None:
+        css = (theme_path / "static" / "css" / "wabi.css").read_text()
+        ratio = _contrast(_css_token(css, "--color-text-subtle"), _css_token(css, bg_token))
+        assert ratio >= 4.5, f"--color-text-subtle on {bg_token} is {ratio:.2f}:1"
+
+    def test_text_subtle_lighter_than_muted(self, theme_path: Path) -> None:
+        css = (theme_path / "static" / "css" / "wabi.css").read_text()
+        assert _luminance(_css_token(css, "--color-text-subtle")) > _luminance(
+            _css_token(css, "--color-text-muted")
+        )
+
+
 class TestLayoutTemplate:
     """Test the layout template content."""
 
